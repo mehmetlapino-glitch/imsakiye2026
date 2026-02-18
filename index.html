@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global İmsakiye Pro 2026</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="data:application/json;base64,ewogICJkZWZhdWx0X2xvY2FsZSI6ICJ0ciIsCiAgIm5hbWUiOiAiR2xvYmFsIEltc2FraXllIiwKICAic2hvcnRfbmFtZSI6ICJJbXFraXllIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwZjE3MmEiLAogICJ0aGVtZV9jb2xvciI6ICIzOGJkZjgiCn0=">
+
+    <style>
+        :root {
+            --bg: #f8fafc; --card: #ffffff; --text: #1e293b;
+            --primary: #2563eb; --accent: #10b981; --highlight: #f59e0b;
+            --input-bg: #f1f5f9; --input-border: #e2e8f0;
+            --logo-light: block; --logo-dark: none;
+        }
+        [data-theme="dark"] {
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc;
+            --primary: #38bdf8; --accent: #2dd4bf; --highlight: #fbbf24;
+            --input-bg: #334155; --input-border: #475569;
+            --logo-light: none; --logo-dark: block;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; transition: 0.3s; box-sizing: border-box; }
+        .card { background: var(--card); width: 100%; max-width: 450px; padding: 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; position: relative; }
+        
+        .logo-container { width: 100%; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; }
+        .logo-container img { max-width: 100%; height: auto; border-radius: 1px; margin: 0 auto; }
+        #logo-light { display: var(--logo-light); }
+        #logo-dark { display: var(--logo-dark); }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .theme-toggle { cursor: pointer; font-size: 1.3rem; background: none; border: none; color: var(--text); }
+        .lang-btn { background: var(--input-bg); border: none; color: var(--text); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
+        .lang-btn.active { background: var(--primary); color: white; }
+
+        .hicri-date { font-size: 0.85rem; color: var(--accent); font-weight: bold; margin-bottom: 5px; }
+        #display-city { margin: 5px 0 15px 0; font-size: 1.4rem; font-weight: 800; color: var(--primary); text-transform: uppercase; }
+
+        .search-container { position: relative; margin-bottom: 20px; }
+        .search-box { display: flex; gap: 8px; }
+        input { flex: 1; background: var(--input-bg); border: 1px solid var(--input-border); padding: 12px; border-radius: 12px; color: var(--text); outline: none; }
+        .suggestions { position: absolute; top: 100%; left: 0; right: 0; background: var(--card); border: 1px solid var(--input-border); z-index: 100; border-radius: 12px; display: none; text-align: left; max-height: 180px; overflow-y: auto; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .s-item { padding: 12px; cursor: pointer; border-bottom: 1px solid var(--input-border); font-size: 0.85rem; }
+
+        #timer { font-size: 3.2rem; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; margin: 5px 0; }
+        #countdown-label { font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .progress-container { background: var(--input-bg); height: 8px; border-radius: 4px; overflow: hidden; margin: 15px 0; }
+        .progress-fill { background: linear-gradient(90deg, var(--primary), var(--accent)); width: 0%; height: 100%; transition: width 1s linear; }
+
+        .vakit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .vakit-item { background: var(--input-bg); padding: 15px; border-radius: 18px; border-bottom: 4px solid var(--accent); }
+        .vakit-time { font-size: 1.6rem; font-weight: bold; }
+
+        .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .tool-btn { background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text); padding: 12px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem; }
+
+        .hadith-area { background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.3); padding: 20px; border-radius: 18px; text-align: left; }
+        #hadith-narrator { font-style: italic; color: #94a3b8; margin-top: 12px; font-size: 0.85rem; text-align: right; }
+
+        /* Kıble Pusulası Modal */
+        #qibla-modal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+            z-index: 999; justify-content: center; align-items: center;
+        }
+        #qibla-modal.open { display: flex; }
+        .qibla-box {
+            background: var(--card); border-radius: 28px; padding: 30px 24px 24px;
+            text-align: center; width: 320px; max-width: 90vw;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+        }
+        .qibla-box h3 { margin: 0 0 6px; color: var(--primary); font-size: 1.2rem; }
+        .qibla-box .sub { font-size: 0.75rem; color: #94a3b8; margin-bottom: 20px; }
+        .compass-wrap {
+            position: relative; width: 220px; height: 220px;
+            margin: 0 auto 20px; user-select: none;
+        }
+        #compass-ring {
+            width: 220px; height: 220px; border-radius: 50%;
+            background: conic-gradient(
+                #1e293b 0deg, #334155 90deg, #1e293b 180deg, #334155 270deg, #1e293b 360deg
+            );
+            border: 3px solid var(--input-border);
+            position: absolute; top: 0; left: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.15s ease-out;
+        }
+        [data-theme="dark"] #compass-ring {
+            background: conic-gradient(
+                #0f172a 0deg, #1e293b 90deg, #0f172a 180deg, #1e293b 270deg, #0f172a 360deg
+            );
+        }
+        .compass-letters {
+            position: absolute; width: 100%; height: 100%; top: 0; left: 0;
+            pointer-events: none;
+        }
+        .compass-letters span {
+            position: absolute; font-size: 0.75rem; font-weight: bold;
+            color: #94a3b8; left: 50%; transform: translateX(-50%);
+        }
+        .compass-letters .cn { top: 8px; color: #ef4444; }
+        .compass-letters .cs { bottom: 8px; }
+        .compass-letters .ce { right: 8px; left: auto; transform: none; top: 50%; margin-top: -8px; }
+        .compass-letters .cw { left: 8px; transform: none; top: 50%; margin-top: -8px; }
+
+        /* Kuzey iğnesi */
+        #north-needle {
+            position: absolute; top: 50%; left: 50%;
+            width: 6px; height: 80px;
+            transform-origin: bottom center;
+            transform: translateX(-50%) translateY(-100%);
+            border-radius: 3px 3px 0 0;
+            background: linear-gradient(to top, transparent 0%, #ef4444 40%, #ef4444 100%);
+            pointer-events: none;
+        }
+        #south-needle {
+            position: absolute; top: 50%; left: 50%;
+            width: 6px; height: 80px;
+            transform-origin: top center;
+            transform: translateX(-50%);
+            border-radius: 0 0 3px 3px;
+            background: linear-gradient(to bottom, transparent 0%, #94a3b8 40%, #94a3b8 100%);
+            pointer-events: none;
+        }
+
+        /* Kıble oku */
+        #qibla-arrow {
+            position: absolute; top: 50%; left: 50%;
+            width: 0; height: 0;
+            transform-origin: center bottom;
+            transform: translateX(-50%) translateY(-100%) rotate(0deg);
+            transition: transform 0.3s ease;
+            pointer-events: none;
+        }
+        #qibla-arrow::before {
+            content: '';
+            position: absolute;
+            left: -12px; top: -90px;
+            width: 0; height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 80px solid #10b981;
+            filter: drop-shadow(0 0 8px #10b981aa);
+        }
+        #qibla-arrow::after {
+            content: '🕋';
+            position: absolute;
+            font-size: 18px;
+            left: -10px; top: -112px;
+        }
+
+        /* Merkez nokta */
+        .compass-center {
+            position: absolute; top: 50%; left: 50%;
+            width: 14px; height: 14px; border-radius: 50%;
+            background: var(--primary);
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .qibla-degree {
+            font-size: 2rem; font-weight: 800; color: var(--primary);
+            margin-bottom: 4px;
+        }
+        .qibla-status {
+            font-size: 0.8rem; margin-bottom: 16px;
+            padding: 6px 14px; border-radius: 20px;
+            background: var(--input-bg); display: inline-block;
+        }
+        .qibla-status.locked { background: rgba(16,185,129,0.15); color: #10b981; }
+        .qibla-status.searching { color: #f59e0b; background: rgba(245,158,11,0.1); }
+        #qibla-close {
+            background: var(--input-bg); border: none; color: var(--text);
+            padding: 10px 28px; border-radius: 12px; cursor: pointer;
+            font-size: 0.9rem; font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card" id="app">
+    <div class="top-bar">
+        <button class="theme-toggle" onclick="toggleTheme()" id="theme-icon">🌙</button>
+        <div class="lang-bar">
+            <button class="lang-btn active" onclick="setLang('tr')">TR</button>
+            <button class="lang-btn" onclick="setLang('en')">EN</button>
+            <button class="lang-btn" onclick="setLang('ar')">AR</button>
+            <button class="lang-btn" onclick="setLang('fr')">FR</button>
+        </div>
+    </div>
+
+    <div class="logo-container">
+        <img src="data:image/png;base64,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" id="logo-light" alt="Logo Light">
+        <img src="data:image/png;base64,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" id="logo-dark" alt="Logo Dark">
+    </div>
+
+    <div id="hicri-display" class="hicri-date">-- Ramadan 1447</div>
+    
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="city-input" placeholder="Şehir..." oninput="handleInput(this.value)" autocomplete="off">
+            <button onclick="searchCity()" style="background:var(--primary); color:white; border:none; padding:10px 15px; border-radius:12px; cursor:pointer;">🔍</button>
+        </div>
+        <h2 id="display-city">...</h2>
+        <div id="suggestions" class="suggestions"></div>
+    </div>
+
+    <div class="countdown-area">
+        <div id="countdown-label">Yükleniyor...</div>
+        <div id="timer">00:00:00</div>
+        <div class="progress-container"><div class="progress-fill" id="progress-bar"></div></div>
+    </div>
+
+    <div class="vakit-grid">
+        <div class="vakit-item">
+            <div style="font-size: 0.7rem; color: #94a3b8;" id="lbl-sahur">Sahur</div>
+            <div class="vakit-time" id="time-fajr">--:--</div>
+        </div>
+        <div class="vakit-item">
+            <div style="font-size: 0.7rem; color: #94a3b8;" id="lbl-iftar">İftar</div>
+            <div class="vakit-time" id="time-maghrib">--:--</div>
+        </div>
+    </div>
+
+    <div class="tool-grid">
+        <button class="tool-btn" onclick="showQibla()">🧭 <span id="lbl-qibla">Kıble</span></button>
+        <button class="tool-btn" onclick="shareHadith()">📤 <span id="lbl-share">Paylaş</span></button>
+    </div>
+
+    <div class="hadith-area">
+        <strong id="lbl-h-title" style="color:var(--highlight); display:block; margin-bottom:8px;">Günün Hadisi</strong>
+        <p id="hadith-text" class="hadith-text">...</p>
+        <p id="hadith-narrator" style="font-style:italic; color:#94a3b8; margin-top:12px; font-size:0.85rem; text-align:right;">...</p>
+    </div>
+</div>
+
+<!-- Kıble Pusulası Modal -->
+<div id="qibla-modal">
+    <div class="qibla-box">
+        <h3>🧭 <span id="modal-qibla-title">Kıble Pusulası</span></h3>
+        <p class="sub" id="modal-qibla-sub">Cihazınızı düz tutun</p>
+
+        <div class="compass-wrap" id="compass-wrap">
+            <div id="compass-ring">
+                <div class="compass-letters">
+                    <span class="cn">K</span>
+                    <span class="cs">G</span>
+                    <span class="ce">D</span>
+                    <span class="cw">B</span>
+                </div>
+            </div>
+            <div id="north-needle"></div>
+            <div id="south-needle"></div>
+            <div id="qibla-arrow"></div>
+            <div class="compass-center"></div>
+        </div>
+
+        <div class="qibla-degree"><span id="qibla-angle-display">--</span>°</div>
+        <div class="qibla-status searching" id="qibla-status-text">📡 Pusula bekleniyor...</div>
+        <br><br>
+        <button id="qibla-close" onclick="closeQibla()">Kapat</button>
+    </div>
+</div>
+
+<script>
+    const hadithList = [
+        {
+            tr: "Ameller niyetlere göredir.",
+            en: "Actions are but by intentions.",
+            ar: "إنما الأعمال بالنيات",
+            fr: "Les actions ne valent que par les intentions.",
+            narrator: { tr: "Ömer bin Hattab (r.a.) / Buhari", en: "Umar ibn al-Khattab / Bukhari", ar: "عمر بن الخطاب / البخاري", fr: "Umar ibn al-Khattab / Bukhari" }
+        },
+        {
+            tr: "Müslüman, elinden ve dilinden başkalarının güvende olduğu kimsedir.",
+            en: "A Muslim is one from whose tongue and hand others are safe.",
+            ar: "المسلم من سلم الناس من لسانه ويده",
+            fr: "Le musulman est celui dont les gens n'ont à redouter ni sa langue ni sa main.",
+            narrator: { tr: "Abdullah bin Amr (r.a.) / Buhari", en: "Abdullah bin Amr / Bukhari", ar: "عبد الله بن عمرو / البخاري", fr: "Abdullah bin Amr / Bukhari" }
+        }
+    ];
+
+    const i18n = {
+        tr: { 
+            sahur: "Sahur", iftar: "İftar", qibla: "Kıble", share: "Paylaş", 
+            leftIftar: "İftara Kalan", leftSahur: "Sahura Kalan", dir: "ltr",
+            cityPlaceholder: "Şehir...",
+            hadithTitle: "Günün Hadisi",
+            modalQiblaTitle: "Kıble Pusulası",
+            modalQiblaSub: "Cihazınızı düz tutun",
+            qiblaStatusSearching: "📡 Pusula sinyali bekleniyor…",
+            qiblaStatusLocked: "✅ Kıbleyi buldunuz!",
+            qiblaStatusNoSensor: "⚠️ Sensör verisi alınamadı. Tarayıcı ayarlarından harekete izin verin.",
+            permissionDenied: "⚠️ Pusula izni reddedildi. Ayarlar → Safari → Hareket ve Yönelim",
+            noSupport: "⚠️ Bu tarayıcı pusula sensörünü desteklemiyor.",
+            closeBtn: "Kapat"
+        },
+        en: { 
+            sahur: "Suhoor", iftar: "Iftar", qibla: "Qibla", share: "Share", 
+            leftIftar: "Until Iftar", leftSahur: "Until Suhoor", dir: "ltr",
+            cityPlaceholder: "City...",
+            hadithTitle: "Hadith of the Day",
+            modalQiblaTitle: "Qibla Compass",
+            modalQiblaSub: "Hold your device flat",
+            qiblaStatusSearching: "📡 Waiting for compass signal…",
+            qiblaStatusLocked: "✅ You found the Qibla!",
+            qiblaStatusNoSensor: "⚠️ No sensor data. Allow motion in browser settings.",
+            permissionDenied: "⚠️ Compass permission denied.",
+            noSupport: "⚠️ This browser does not support compass sensor.",
+            closeBtn: "Close"
+        },
+        ar: { 
+            sahur: "السحور", iftar: "الإفطار", qibla: "القبلة", share: "مشاركة", 
+            leftIftar: "باقي للإفطار", leftSahur: "باقي للسحور", dir: "rtl",
+            cityPlaceholder: "المدينة...",
+            hadithTitle: "حديث اليوم",
+            modalQiblaTitle: "بوصلة القبلة",
+            modalQiblaSub: "امسك جهازك بشكل مسطح",
+            qiblaStatusSearching: "📡 انتظار إشارة البوصلة…",
+            qiblaStatusLocked: "✅ وجدت القبلة!",
+            qiblaStatusNoSensor: "⚠️ لم يتم الحصول على بيانات المستشعر. اسمح بالحركة في إعدادات المتصفح.",
+            permissionDenied: "⚠️ تم رفض إذن البوصلة.",
+            noSupport: "⚠️ لا يدعم هذا المتصفح مستشعر البوصلة.",
+            closeBtn: "إغلاق"
+        },
+        fr: { 
+            sahur: "Suhur", iftar: "Iftar", qibla: "Qibla", share: "Partager", 
+            leftIftar: "Jusqu'à l'Iftar", leftSahur: "Jusqu'au Suhur", dir: "ltr",
+            cityPlaceholder: "Ville...",
+            hadithTitle: "Hadith du Jour",
+            modalQiblaTitle: "Boussole Qibla",
+            modalQiblaSub: "Tenez votre appareil à plat",
+            qiblaStatusSearching: "📡 En attente du signal de la boussole…",
+            qiblaStatusLocked: "✅ Vous avez trouvé la Qibla !",
+            qiblaStatusNoSensor: "⚠️ Aucune donnée de capteur. Autorisez le mouvement dans les paramètres du navigateur.",
+            permissionDenied: "⚠️ Permission boussole refusée.",
+            noSupport: "⚠️ Ce navigateur ne prend pas en charge le capteur de boussole.",
+            closeBtn: "Fermer"
+        }
+    };
+
+    let currentLang = 'tr', times = {}, qiblaAngle = 0;
+    let currentLat = null, currentLon = null;
+
+    function toggleTheme() {
+        const body = document.documentElement;
+        const icon = document.getElementById('theme-icon');
+        if (body.getAttribute('data-theme') === 'dark') {
+            body.removeAttribute('data-theme'); icon.innerText = '🌙';
+            localStorage.setItem('theme', 'light');
+        } else {
+            body.setAttribute('data-theme', 'dark'); icon.innerText = '☀️';
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+
+    function setLang(lang) {
+        currentLang = lang;
+        const t = i18n[lang];
+        document.getElementById('lbl-sahur').innerText = t.sahur;
+        document.getElementById('lbl-iftar').innerText = t.iftar;
+        document.getElementById('lbl-qibla').innerText = t.qibla;
+        document.getElementById('lbl-share').innerText = t.share;
+        document.getElementById('city-input').placeholder = t.cityPlaceholder;
+        document.getElementById('lbl-h-title').innerText = t.hadithTitle;
+        document.getElementById('modal-qibla-title').innerText = t.modalQiblaTitle;
+        document.getElementById('modal-qibla-sub').innerText = t.modalQiblaSub;
+        document.getElementById('qibla-close').innerText = t.closeBtn;
+        document.getElementById('app').dir = t.dir;
+
+        const idx = new Date().getDate() % hadithList.length;
+        const had = hadithList[idx];
+        document.getElementById('hadith-text').innerText = had[lang];
+        document.getElementById('hadith-narrator').innerText = had.narrator[lang];
+
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.innerText.toLowerCase() === lang));
+    }
+
+    async function handleInput(val) {
+        const box = document.getElementById('suggestions');
+        if (val.length < 3) return box.style.display = 'none';
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${val}&limit=5`);
+        const data = await res.json();
+        box.innerHTML = '';
+        data.forEach(d => {
+            const div = document.createElement('div'); div.className = 's-item';
+            div.innerText = d.display_name.split(',')[0];
+            div.onclick = () => {
+                document.getElementById('city-input').value = div.innerText;
+                box.style.display = 'none';
+                searchCity();
+            };
+            box.appendChild(div);
+        });
+        box.style.display = 'block';
+    }
+
+    async function searchCity() {
+        const cityInput = document.getElementById('city-input').value.trim();
+        if (!cityInput) return;
+
+        let geoRes, geoData;
+        try {
+            geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityInput)}&limit=1`);
+            geoData = await geoRes.json();
+        } catch (e) {
+            alert('Konum servisi şu anda kullanılamıyor.');
+            return;
+        }
+
+        if (!geoData || geoData.length === 0) {
+            alert('Konum bulunamadı!');
+            return;
+        }
+
+        const lat = parseFloat(geoData[0].lat);
+        const lon = parseFloat(geoData[0].lon);
+        currentLat = lat;
+        currentLon = lon;
+
+        const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=13`);
+        const data = await res.json();
+
+        if (data.code === 200) {
+            times = data.data.timings;
+
+            document.getElementById('display-city').innerText = cityInput.toUpperCase().split(',')[0];
+            document.getElementById('time-fajr').innerText = times.Fajr;
+            document.getElementById('time-maghrib').innerText = times.Maghrib;
+            document.getElementById('hicri-display').innerText =
+                `${data.data.date.hijri.day} ${data.data.date.hijri.month.en} ${data.data.date.hijri.year}`;
+
+            await fetchQiblaForCoords(currentLat, currentLon);
+
+            localStorage.setItem('lastCity', cityInput);
+            startCountdown();
+        } else {
+            alert('Namaz vakitleri alınamadı. Lütfen tekrar deneyin.');
+        }
+    }
+
+    async function fetchQiblaForCoords(lat, lon) {
+        try {
+            const qRes = await fetch(`https://api.aladhan.com/v1/qibla/${lat}/${lon}`);
+            const qData = await qRes.json();
+            qiblaAngle = parseFloat(qData.data.direction.toFixed(2));
+            if (document.getElementById('qibla-modal').classList.contains('open')) {
+                document.getElementById('qibla-angle-display').innerText = qiblaAngle;
+                updateQiblaArrow();
+            }
+        } catch (e) {
+            console.warn('Kıble hesaplanamadı:', e);
+        }
+    }
+
+    function startCountdown() {
+        if (window.timerInt) clearInterval(window.timerInt);
+        window.timerInt = setInterval(() => {
+            if (!times.Fajr) return;
+            const now = new Date();
+            const parseT = (t) => {
+                const [h, m] = t.split(':');
+                let d = new Date();
+                d.setHours(h, m, 0, 0);
+                return d;
+            };
+            let f = parseT(times.Fajr), m = parseT(times.Maghrib);
+            let target, label;
+
+            if (now < f) { target = f; label = i18n[currentLang].leftSahur; }
+            else if (now < m) { target = m; label = i18n[currentLang].leftIftar; }
+            else { target = new Date(f); target.setDate(target.getDate() + 1); label = i18n[currentLang].leftSahur; }
+
+            const diff = target - now;
+            const h = Math.floor(diff / 3600000),
+                  min = Math.floor((diff % 3600000) / 60000),
+                  s = Math.floor((diff % 60000) / 1000);
+            document.getElementById('timer').innerText =
+                `${h.toString().padStart(2,'0')}:${min.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            document.getElementById('countdown-label').innerText = label;
+
+            if (now > f && now < m) {
+                document.getElementById('progress-bar').style.width = ((now - f) / (m - f) * 100) + "%";
+            } else {
+                document.getElementById('progress-bar').style.width = "0%";
+            }
+        }, 1000);
+    }
+
+    let compassHeading = null;
+    let _absHandler   = null;
+    let _relHandler   = null;
+    let _absReceived  = false;
+    let _noSensorTimer = null;
+
+    function showQibla() {
+        const t = i18n[currentLang];
+        document.getElementById('qibla-modal').classList.add('open');
+        document.getElementById('qibla-angle-display').innerText = qiblaAngle || '--';
+        if (currentLat !== null) {
+            document.getElementById('modal-qibla-sub').innerText =
+                `${currentLat.toFixed(4)}°, ${currentLon.toFixed(4)}° — Kıble: ${qiblaAngle}° K`;
+        }
+        renderCompassTicks();
+        updateQiblaArrow();
+        startCompass();
+    }
+
+    function closeQibla() {
+        document.getElementById('qibla-modal').classList.remove('open');
+        stopCompass();
+    }
+
+    function renderCompassTicks() {
+        const ring = document.getElementById('compass-ring');
+        if (ring.querySelector('.tick-marks')) return;
+        const wrap = document.createElement('div');
+        wrap.className = 'tick-marks';
+        wrap.style.cssText = 'position:absolute;width:100%;height:100%;top:0;left:0;pointer-events:none;';
+        const r = 107;
+        const ns = 'http://www.w3.org/2000/svg';
+        for (let i = 0; i < 360; i += 5) {
+            const isMajor = i % 45 === 0, isMinor = i % 15 === 0;
+            const len = isMajor ? 14 : isMinor ? 9 : 5;
+            const rad = (i - 90) * Math.PI / 180;
+            const x1 = 110 + r * Math.cos(rad), y1 = 110 + r * Math.sin(rad);
+            const x2 = 110 + (r - len) * Math.cos(rad), y2 = 110 + (r - len) * Math.sin(rad);
+            const svg = document.createElementNS(ns, 'svg');
+            svg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;';
+            svg.setAttribute('viewBox', '0 0 220 220');
+            const line = document.createElementNS(ns, 'line');
+            line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+            line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+            line.setAttribute('stroke', isMajor ? '#64748b' : '#334155');
+            line.setAttribute('stroke-width', isMajor ? '2' : '1');
+            svg.appendChild(line); wrap.appendChild(svg);
+        }
+        ring.appendChild(wrap);
+    }
+
+    function smoothAngle(prev, next) {
+        if (prev === null) return next;
+        let diff = next - prev;
+        if (diff >  180) diff -= 360;
+        if (diff < -180) diff += 360;
+        return ((prev + diff * 0.4) + 360) % 360;
+    }
+
+    function updateQiblaArrow() {
+        const arrow  = document.getElementById('qibla-arrow');
+        const ring   = document.getElementById('compass-ring');
+        const northN = document.getElementById('north-needle');
+        const southN = document.getElementById('south-needle');
+        const stat   = document.getElementById('qibla-status-text');
+        const t = i18n[currentLang];
+
+        if (compassHeading !== null && qiblaAngle) {
+            ring.style.transform   = `rotate(${-compassHeading}deg)`;
+            northN.style.transform = `translateX(-50%) translateY(-100%) rotate(${compassHeading}deg)`;
+            southN.style.transform = `translateX(-50%) rotate(${compassHeading}deg)`;
+            const rel  = qiblaAngle - compassHeading;
+            arrow.style.transform  = `translateX(-50%) translateY(-100%) rotate(${rel}deg)`;
+            const norm = ((rel % 360) + 360) % 360;
+            const ok   = norm < 8 || norm > 352;
+            stat.className = 'qibla-status ' + (ok ? 'locked' : 'searching');
+            stat.innerText = ok
+                ? t.qiblaStatusLocked
+                : `🧭 Yönünüz: ${Math.round(compassHeading)}° — Kıble: ${qiblaAngle}° K`;
+        } else if (qiblaAngle) {
+            arrow.style.transform = `translateX(-50%) translateY(-100%) rotate(${qiblaAngle}deg)`;
+            stat.className = 'qibla-status searching';
+            stat.innerText = t.qiblaStatusSearching;
+        } else {
+            stat.className = 'qibla-status searching';
+            stat.innerText = t.qiblaStatusSearching;
+        }
+    }
+
+    function processOrientationEvent(e, forceAbsolute) {
+        let heading = null;
+        if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading) && e.webkitCompassHeading >= 0) {
+            heading = e.webkitCompassHeading;
+        } else if ((forceAbsolute || e.absolute === true) && e.alpha !== null && e.alpha !== undefined) {
+            heading = (360 - e.alpha + 360) % 360;
+        }
+        if (heading !== null) {
+            compassHeading = smoothAngle(compassHeading, heading);
+            updateQiblaArrow();
+        }
+    }
+
+    function attachListeners() {
+        _absReceived = false;
+        _absHandler = (e) => {
+            if (e.alpha !== null && e.alpha !== undefined) {
+                _absReceived = true;
+                processOrientationEvent(e, true);
+            }
+        };
+        window.addEventListener('deviceorientationabsolute', _absHandler, true);
+
+        _relHandler = (e) => {
+            if (_absReceived) return;
+            processOrientationEvent(e, false);
+        };
+        window.addEventListener('deviceorientation', _relHandler, true);
+
+        _noSensorTimer = setTimeout(() => {
+            if (compassHeading === null) {
+                const stat = document.getElementById('qibla-status-text');
+                if (stat) {
+                    stat.className = 'qibla-status searching';
+                    stat.innerText = i18n[currentLang].qiblaStatusNoSensor;
+                }
+            }
+        }, 2000);
+    }
+
+    function startCompass() {
+        stopCompass();
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission()
+                .then(state => {
+                    if (state === 'granted') attachListeners();
+                    else {
+                        const stat = document.getElementById('qibla-status-text');
+                        stat.className = 'qibla-status searching';
+                        stat.innerText = i18n[currentLang].permissionDenied;
+                    }
+                })
+                .catch(() => {
+                    const stat = document.getElementById('qibla-status-text');
+                    stat.className = 'qibla-status searching';
+                    stat.innerText = '⚠️ İzin alınamadı.';
+                });
+        } else if ('DeviceOrientationEvent' in window) {
+            attachListeners();
+        } else {
+            const stat = document.getElementById('qibla-status-text');
+            stat.className = 'qibla-status searching';
+            stat.innerText = i18n[currentLang].noSupport;
+            updateQiblaArrow();
+        }
+    }
+
+    function stopCompass() {
+        if (_absHandler)  { window.removeEventListener('deviceorientationabsolute', _absHandler, true); _absHandler = null; }
+        if (_relHandler)  { window.removeEventListener('deviceorientation',         _relHandler, true); _relHandler = null; }
+        if (_noSensorTimer) { clearTimeout(_noSensorTimer); _noSensorTimer = null; }
+        compassHeading = null;
+        _absReceived   = false;
+    }
+
+    document.getElementById('qibla-modal').addEventListener('click', function (e) {
+        if (e.target === this) closeQibla();
+    });
+
+    function shareHadith() {
+        const idx = new Date().getDate() % hadithList.length;
+        const had = hadithList[idx];
+        const hadithText = had[currentLang];
+        const narratorText = had.narrator[currentLang];
+        const text = `"${hadithText}"\n\n${narratorText}`;
+        if (navigator.share) navigator.share({ title: 'Hadis', text: text });
+        else {
+            navigator.clipboard && navigator.clipboard.writeText(text);
+            alert('Kopyalandı!');
+        }
+    }
+
+    if (localStorage.getItem('theme') === 'dark') toggleTheme();
+    setLang('tr');
+    const saved = localStorage.getItem('lastCity') || "Eskişehir";
+    document.getElementById('city-input').value = saved;
+    searchCity();
+</script>
+</body>
+</html>
